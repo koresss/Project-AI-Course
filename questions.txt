@@ -1,0 +1,2 @@
+- Should we use synthetic data to simulate intermittent forecast? (Nothing done so far seems to really look THAT intermittent)
+- Data points might not be enough -> get more? data augmentation?
