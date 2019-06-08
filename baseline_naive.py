@@ -7,7 +7,9 @@ from sklearn.metrics import mean_absolute_error
 
 with open('split_data.pkl', 'rb') as f:
 	train, val, test = pickle.load(f)
-
+train = train[:, 0]
+val = val[:, 0]
+test = test[:, 0]
 train = np.append(train, val)
 
 forecast_train = np.roll(train, 1)
