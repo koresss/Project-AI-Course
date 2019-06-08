@@ -4,6 +4,8 @@ import numpy as np
 with open('data.pkl', 'rb') as f:
 	data = pickle.load(f)
 
+data['day_num'] = np.arange(0, len(data), 1)
+
 # Convert to np array
 data = data.values
 # Split to train val test
