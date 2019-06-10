@@ -79,9 +79,11 @@ import random
 import matplotlib.pyplot as plt
 
 train,val,test=pkl.load(open('split_data.pkl','rb'))
-train=train.squeeze()
-val=val.squeeze()
-test=test.squeeze()
+train=train.squeeze()[:,0]
+#print(train)
+#print(train[:,0])
+val=val.squeeze()[:,0]
+test=test.squeeze()[:,0]
 
 def gen(data,batch_size, steps_per_epoch,
 				input_sequence_length, target_sequence_length,seed=43):
@@ -95,6 +97,7 @@ def gen(data,batch_size, steps_per_epoch,
 			signals = np.zeros((batch_size, num_points))
 			for i in range(batch_size):
 				idx=random.randint(0,len(data)-num_points-1)
+				#print(data[idx:idx+num_points])
 				signals[i]=data[idx:idx+num_points]
 			signals = np.expand_dims(signals, axis=2)
 			
