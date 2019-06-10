@@ -1,4 +1,4 @@
 TODO
 
 Optimize gbm with kfold
-Debug Croston
+Check if Croston correct, optimize alpha
