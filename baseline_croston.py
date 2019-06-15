@@ -55,4 +55,10 @@ plt.legend()
 plt.show()
 
 forecast_val = np.ones(len(val))*forecasts[-1]
-print('MAE val: ', mean_absolute_error(forecast_val, val))
+
+naive_mae_train, naive_mae_val, test_mae_val = naive_forecast()
+
+print('-'*30)
+print('VAL')
+val_mae = mean_absolute_error(forecast_val, val)
+print('MAE: {} Naive MAE: {} MASE: {}'.format(val_mae, naive_mae_val, val_mae/naive_mae_val))

@@ -32,8 +32,10 @@ def naive_forecast():
 
 	return train_mae, val_mae, test_mae
 
-train_mae, val_mae, test_mae = naive_forecast()
 
-print('Train MAE: {}\nVal MAE: {}\nTest MAE: {}'.format(train_mae, val_mae, test_mae))
-# Probably no sense to use val and test for naive method, tbh
-# Might as well do it on the entire set
+if __name__ == "__main__":
+	train_mae, val_mae, test_mae = naive_forecast()
+
+	print('Train MAE: {}\nVal MAE: {}\nTest MAE: {}'.format(train_mae, val_mae, test_mae))
+	# Probably no sense to use val and test for naive method, tbh
+	# Might as well do it on the entire set
