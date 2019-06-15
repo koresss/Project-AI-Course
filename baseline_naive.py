@@ -30,9 +30,7 @@ def naive_forecast(fname):
 	train_mae = mean_absolute_error(train, forecast_train)
 	test_mae = mean_absolute_error(test, forecast_test)
 	val_mae = mean_absolute_error(val, forecast_val)
-	plt.plot(train)
-	plt.plot(forecast_train)
-	plt.show()
+
 	return train_mae, val_mae, test_mae
 
 

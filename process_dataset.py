@@ -11,8 +11,8 @@ df.drop('date_block_num', axis=1, inplace=True)
 
 # Select pink floyd dark side of the moon albums
 
-# df = df[df['item_id'].isin([5466,5467,5468,5469,5470])]
-df = df[df['shop_id'].isin([45])]
+df = df[df['item_id'].isin([5466,5467,5468,5469,5470])]
+# df = df[df['shop_id'].isin([45])]
 # df = df[df['item_id'].isin([8885])]
 
 # df = df[df['item_id'].isin(range(1749, 1754))]
@@ -35,13 +35,13 @@ print(df[df['item_cnt_day'] == 0.0].count())
 
 
 # Create synthetic intermittent data
-vals = df.values
-vals2 = np.copy(vals)
-for idx, elem in enumerate(vals):
-	if idx%30==0 and idx!=0:
-		vals2 = np.insert(vals2, idx, np.zeros(np.random.randint(7,15)))
+# vals = df.values
+# vals2 = np.copy(vals)
+# for idx, elem in enumerate(vals):
+# 	if idx%30==0 and idx!=0:
+# 		vals2 = np.insert(vals2, idx, np.zeros(np.random.randint(7,15)))
 
-df = pd.DataFrame(vals2)
+# df = pd.DataFrame(vals2)
 
 
 # Add col with day num
@@ -66,7 +66,7 @@ print(df.head(6))
 # TODO
 
 # Cut to first 1000 elems only
-df = df.head(1000)
+# df = df.head(1000)
 plt.plot(df['item_cnt_day'])
 plt.show()
 # Convert to np array
@@ -75,5 +75,5 @@ df = df.values
 train, val, test = np.split(df, [int(0.8*len(df)), int(0.9*len(df))], axis=0)
 
 
-with open('synthetic_data.pkl', 'wb') as f:
+with open('split_data.pkl', 'wb') as f:
 	pickle.dump((train,val,test), f)

@@ -8,7 +8,7 @@ from sklearn.preprocessing import scale
 from baseline_naive import naive_forecast
 import matplotlib.pyplot as plt
 
-fname = 'synthetic_data.pkl'
+fname = 'split_data.pkl'
 with open(fname, 'rb') as f:
 	train, val, test = pickle.load(f)
 

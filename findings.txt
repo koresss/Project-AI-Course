@@ -1,3 +1,7 @@
 - GBM performs worse when adding lags of 1,2,3 (val MASE 0.7 -> 0.78)
 - LSTMs not that good,GBM okayish, Croston kinda bad
 - Results depend heavily on the data (we tried synthetic data, and also on other products)
+
+- Using synthetic data causes naive forecast to be much better, croston and gbm perform bad (1.18, 0.87 repsectively), LSTM performs pretty good (0.77)
+
+- Hypothesis : the more zeros between demands the better lstm and the worst gbm and croston will get
