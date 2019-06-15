@@ -1,7 +1,7 @@
 import numpy as np
 import pickle
 import itertools
-from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.ensemble import GradientBoostingRegressor, GradientBoostingClassifier
 from sklearn.metrics import mean_absolute_error
 from sklearn.preprocessing import scale
 
@@ -44,7 +44,7 @@ for elem in itertools.product(n_estims, subsamples, lrs):
 	lr = elem[2]
 	print('-'*30)
 	
-	model = GradientBoostingRegressor(loss='lad',
+	model = GradientBoostingRegression(loss='',
 									  criterion='mae',
 									  learning_rate=lr,
 									  subsample=0.6,
@@ -81,7 +81,7 @@ print('-'*30)
 
 n_estim, subsample, lr = best_params
 
-model = GradientBoostingRegressor(loss='lad',
+model = GradientBoostingRegression(loss='lad',
 								  criterion='mae',
 								  learning_rate=lr,
 								  subsample=subsample,
@@ -89,7 +89,8 @@ model = GradientBoostingRegressor(loss='lad',
 
 model.fit(x_train, y_train)
 preds_test = model.predict(x_test)
-plt.plot(preds_test, label='pred')
-plt.plot(y_test, label='ground truth')
+preds_train = model.predict(x_train)
+plt.plot(preds_train, label='pred')
+plt.plot(y_train, label='ground truth')
 plt.legend()
 plt.show()

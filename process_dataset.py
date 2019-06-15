@@ -11,6 +11,7 @@ df.drop('date_block_num', axis=1, inplace=True)
 
 # Select pink floyd dark side of the moon albums
 df = df[df['item_id'].isin([5466,5467,5468,5469,5470])]
+# df = df[df['shop_id'].isin([45])]
 # df = df[df['item_id'].isin([8885])]
 
 # Convert date to datetime obj, sort by it, sum item counts per day
@@ -25,11 +26,32 @@ df = df.reindex(idx, fill_value=0)
 
 
 df = pd.DataFrame(df)
-plt.plot(df)
-plt.show()
 
 print(df.head(50))
 print(df.count())
 print(df[df['item_cnt_day'] == 0.0].count())
-with open('data.pkl', 'wb') as f:
-	pickle.dump(df, f)
+
+df['day_num'] = np.arange(0, len(df), 1)
+
+# Add lags
+from pandas import Series
+from pandas import DataFrame
+from pandas import concat
+df = concat([df['item_cnt_day'].shift(1),
+			 df['item_cnt_day'].shift(2),
+			 df['item_cnt_day'].shift(3),
+			 df], axis=1)
+df.columns = ['lag1', 'lag2', 'lag3', 'item_cnt_day', 'day_num']
+# Remove first three rows as they would have NaNs
+df = df.iloc[3:]
+plt.plot(df['item_cnt_day'])
+plt.show()
+print(df.head(5))
+# Convert to np array
+df = df.values
+# Split to train val test
+train, val, test = np.split(df, [int(0.8*len(df)), int(0.9*len(df))], axis=0)
+
+
+with open('split_data.pkl', 'wb') as f:
+	pickle.dump((train,val,test), f)
