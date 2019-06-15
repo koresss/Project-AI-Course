@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from sklearn.metrics import mean_absolute_error
+from baseline_naive import naive_forecast
 
 with open('split_data.pkl', 'rb') as f:
 	train, val, test = pickle.load(f)
@@ -39,7 +40,7 @@ def crostons(train, alpha):
 train_temp = np.delete(train, 0)
 train_temp = train_temp.tolist()
 
-for alpha in np.linspace(0.1, 1, 15):
+for alpha in np.linspace(0.1, 1, 30):
 	forecasts = crostons(train, alpha)
 	forecast_val = np.ones(len(val))*forecasts[-1]
 	forecast_train = np.ones(len(train_temp))*forecasts[-1]
@@ -55,4 +56,3 @@ plt.show()
 
 forecast_val = np.ones(len(val))*forecasts[-1]
 print('MAE val: ', mean_absolute_error(forecast_val, val))
-

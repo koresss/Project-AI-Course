@@ -3,6 +3,7 @@ import pickle
 import itertools
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.metrics import mean_absolute_error
+from baseline_naive import naive_forecast
 
 with open('split_data.pkl', 'rb') as f:
 	train, val, test = pickle.load(f)
@@ -31,7 +32,8 @@ n_estims = [40, 100, 160, 240, 300]
 subsamples = np.linspace(0, 1, 6)[1:]
 lrs = [0.01, 0.03, 0.1]
 
-best = 100
+best_val = 100
+best_train = 100
 
 for elem in itertools.product(n_estims, subsamples, lrs):
 	n_estim = elem[0]
@@ -52,10 +54,20 @@ for elem in itertools.product(n_estims, subsamples, lrs):
 	mae_train = mean_absolute_error(y_train, preds_train)
 	mae_val = mean_absolute_error(y_val, preds_val)
 
-	if mae_val < best:
-		best = mae_val
+	if mae_train < best_train:
+		best_train = mae_train
+
+	if mae_val < best_val:
+		best_val = mae_val
 		best_params = elem
 	print('n estim={}, subsample={}, lr={}\nTrain MAE: {}\nVal MAE: {}'.format(
 		  n_estim, subsample, lr, mae_train, mae_val))
 
-print('Best params found: {} with val MAE of {}'.format(best_params, best))
+naive_mae_train, naive_mae_val, test_mae_val = naive_forecast()
+
+print('-'*30)
+print('Best params found: {} with val MAE of {}'.format(best_params, best_val))
+print('Naive MAE val : ', naive_mae_val)
+print('-'*30)
+print('MASE train of best params: {}'.format(best_train/naive_mae_train))
+print('MASE val of best params: {}'.format(best_val/naive_mae_val))
