@@ -8,17 +8,17 @@ from sklearn.preprocessing import scale
 from baseline_naive import naive_forecast
 import matplotlib.pyplot as plt
 
-with open('split_data.pkl', 'rb') as f:
+with open('synthetic_data.pkl', 'rb') as f:
 	train, val, test = pickle.load(f)
 
 # Split the x and y vars
-x_train, y_train = train[:,1], train[:,0]
-x_val, y_val = val[:, 1], val[:, 0]
-x_test, y_test = test[:, 1], test[:, 0]
+x_train, y_train = train[:,1:], train[:,0]
+x_val, y_val = val[:, 1:], val[:, 0]
+x_test, y_test = test[:, 1:], test[:, 0]
 
-x_train = x_train.reshape(-1, 1)
-x_val = x_val.reshape(-1, 1)
-x_test = x_test.reshape(-1, 1)
+# x_train = x_train.reshape(-1, 1)
+# x_val = x_val.reshape(-1, 1)
+# x_test = x_test.reshape(-1, 1)
 
 model = GradientBoostingRegressor(loss='lad', learning_rate=0.01, n_estimators=100,
 								 )
@@ -44,7 +44,7 @@ for elem in itertools.product(n_estims, subsamples, lrs):
 	lr = elem[2]
 	print('-'*30)
 	
-	model = GradientBoostingRegression(loss='',
+	model = GradientBoostingRegressor(loss='lad',
 									  criterion='mae',
 									  learning_rate=lr,
 									  subsample=0.6,
@@ -81,7 +81,7 @@ print('-'*30)
 
 n_estim, subsample, lr = best_params
 
-model = GradientBoostingRegression(loss='lad',
+model = GradientBoostingRegressor(loss='lad',
 								  criterion='mae',
 								  learning_rate=lr,
 								  subsample=subsample,

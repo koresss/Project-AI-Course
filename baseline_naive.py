@@ -6,7 +6,7 @@ from sklearn.metrics import mean_absolute_error
 # Naive model simply predicts value of previous day
 
 def naive_forecast():
-	with open('split_data.pkl', 'rb') as f:
+	with open('synthetic_data.pkl', 'rb') as f:
 		train, val, test = pickle.load(f)
 	train = train[:, 0]
 	val = val[:, 0]
