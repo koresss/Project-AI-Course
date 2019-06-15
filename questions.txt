@@ -1,12 +1,16 @@
+For MASE always scale by in-sample prediction of naive forecast? (aka even for validation set?) Yes
+
 Questions about data:
 	- Data is univariate. Is that okay?
-	- Should we use synthetic data to simulate intermittent forecast? (Nothing done so far seems to really look THAT intermittent)
+	- Should we use synthetic data to simulate intermittent forecast? (Nothing done so far seems to really look THAT intermittent) -> good idea to compare models for their sensitivity to infrequency (just an idea)
 	- Data points might not be enough -> get more? data augmentation?
 	- Is it possible to do crossvalidation?
 
 Questions about croston:
-	- forecast = a/p. What to do when p=0? Should a and p be initialized with 0?
-	- does croston just predict the average on the val set?
+	- forecast = a/p. What to do when p=0? Should a and p be initialized with 0? => cold start problem in exponential smoothing
+	- does croston just predict the average on the val set? yes
 
 Questions about gbm:
 	-  Currently using gbm to do pointwise regression, only 1 feature = day num.
+
+Move to multivariate case -> add more time indexes (year, quarter, month, month of year, day of week etc.) scale by sin,cosine

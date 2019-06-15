@@ -7,6 +7,7 @@ import pickle
 # Read csv, select a shop, drop date block num
 df = pd.read_csv('Dataset/sales_train_v2.csv')
 # df = df[df['shop_id']==31]
+print(df.head(5))
 df.drop('date_block_num', axis=1, inplace=True)
 
 # Select pink floyd dark side of the moon albums

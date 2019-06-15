@@ -31,6 +31,8 @@ n_estims = [40, 100, 160, 240, 300]
 subsamples = np.linspace(0, 1, 6)[1:]
 lrs = [0.01, 0.03, 0.1]
 
+best = 100
+
 for elem in itertools.product(n_estims, subsamples, lrs):
 	n_estim = elem[0]
 	subsample = elem[1]
@@ -50,5 +52,10 @@ for elem in itertools.product(n_estims, subsamples, lrs):
 	mae_train = mean_absolute_error(y_train, preds_train)
 	mae_val = mean_absolute_error(y_val, preds_val)
 
+	if mae_val < best:
+		best = mae_val
+		best_params = elem
 	print('n estim={}, subsample={}, lr={}\nTrain MAE: {}\nVal MAE: {}'.format(
 		  n_estim, subsample, lr, mae_train, mae_val))
+
+print('Best params found: {} with val MAE of {}'.format(best_params, best))

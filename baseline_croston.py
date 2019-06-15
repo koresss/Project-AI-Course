@@ -44,7 +44,8 @@ train_temp = train_temp.tolist()
 
 for alpha in np.linspace(0.0001, 1, 15):
 	forecasts = crostons(train, alpha)
-	print('Train MAE:', mean_absolute_error(forecasts, train_temp))
+	print('Alpha = {} train MAE: {}'.format(alpha, mean_absolute_error(forecasts, train_temp)
+			))
 	print('-'*30)
 
 plt.plot(forecasts, label='forecasts')
