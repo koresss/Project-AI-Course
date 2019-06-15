@@ -11,8 +11,8 @@ train = train[:,0]
 val = val[:,0]
 
 def crostons(train, alpha):
-	a = 0
-	p = 0
+	a = int(train[0])
+	p = 1
 	# q is time elapsed since previous demand occurence
 	q = 0
 
@@ -23,14 +23,11 @@ def crostons(train, alpha):
 		if elem != 0:
 			a = alpha*elem + (1-alpha)*a
 			p = alpha*q + (1-alpha)*p
+			q = 1
 		# If not, no need to update a and p
 		# but need to keep track of q
 		if elem==0:
-			if train[idx-1] == 0:
-				# print('increment')
-				q += 1
-			if train[idx-1] != 0:
-				q = 1
+			q += 1
 		try:
 			forecast = a/p
 		except:
@@ -42,13 +39,20 @@ def crostons(train, alpha):
 train_temp = np.delete(train, 0)
 train_temp = train_temp.tolist()
 
-for alpha in np.linspace(0.0001, 1, 15):
+for alpha in np.linspace(0.1, 1, 15):
 	forecasts = crostons(train, alpha)
-	print('Alpha = {} train MAE: {}'.format(alpha, mean_absolute_error(forecasts, train_temp)
+	forecast_val = np.ones(len(val))*forecasts[-1]
+	forecast_train = np.ones(len(train_temp))*forecasts[-1]
+	print('Alpha = {} train MAE: {} val MAE: {}'.format(alpha, mean_absolute_error(forecast_train, train_temp),
+		  mean_absolute_error(forecast_val, val)
 			))
 	print('-'*30)
 
-plt.plot(forecasts, label='forecasts')
+plt.plot(forecast_train, label='forecasts')
 plt.plot(train, label='train')
 plt.legend()
 plt.show()
+
+forecast_val = np.ones(len(val))*forecasts[-1]
+print('MAE val: ', mean_absolute_error(forecast_val, val))
+
