@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import pickle
 from sklearn.metrics import mean_absolute_error
+import matplotlib.pyplot as plt
 
 # Naive model simply predicts value of previous day
 
@@ -29,14 +30,17 @@ def naive_forecast(fname):
 	train_mae = mean_absolute_error(train, forecast_train)
 	test_mae = mean_absolute_error(test, forecast_test)
 	val_mae = mean_absolute_error(val, forecast_val)
-
+	plt.plot(train)
+	plt.plot(forecast_train)
+	plt.show()
 	return train_mae, val_mae, test_mae
 
 
 if __name__ == "__main__":
-	fname = 'split_data.pkl'
+	fname = 'synthetic_data.pkl'
 	train_mae, val_mae, test_mae = naive_forecast(fname)
 
 	print('Train MAE: {}\nVal MAE: {}\nTest MAE: {}'.format(train_mae, val_mae, test_mae))
+
 	# Probably no sense to use val and test for naive method, tbh
 	# Might as well do it on the entire set

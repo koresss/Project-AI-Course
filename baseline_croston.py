@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import mean_absolute_error
 from baseline_naive import naive_forecast
 
-fname = 'split_data.pkl'
+fname = 'synthetic_data.pkl'
 with open(fname, 'rb') as f:
 	train, val, test = pickle.load(f)
 
@@ -73,3 +73,8 @@ print('MAE: {} Naive MAE: {} MASE: {}'.format(val_mae, naive_mae_val, val_mae/na
 print('Test')
 test_mae = mean_absolute_error(forecast_test, test)
 print('MAE: {} Naive MAE: {} MASE: {}'.format(test_mae, naive_mae_test, test_mae/naive_mae_test))
+
+plt.plot(forecast_val, label='forecasts')
+plt.plot(val, label='train')
+plt.legend()
+plt.show()

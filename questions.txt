@@ -20,4 +20,4 @@ Questions saturday:
 	- Should we do 1 step ahead prediction for croston and gradient boosting?
 	- Template for poster?
 	- GBM and LSTM predict just zeros for testing set
-	- How does Croston's method deal with feature lags?
+	- How does Croston's method deal with feature lags or extra features?

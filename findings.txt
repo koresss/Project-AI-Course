@@ -1,1 +1,3 @@
 - GBM performs worse when adding lags of 1,2,3 (val MASE 0.7 -> 0.78)
+- LSTMs not that good,GBM okayish, Croston kinda bad
+- Results depend heavily on the data (we tried synthetic data, and also on other products)
