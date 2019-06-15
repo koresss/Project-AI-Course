@@ -5,8 +5,8 @@ from sklearn.metrics import mean_absolute_error
 
 # Naive model simply predicts value of previous day
 
-def naive_forecast():
-	with open('synthetic_data.pkl', 'rb') as f:
+def naive_forecast(fname):
+	with open(fname, 'rb') as f:
 		train, val, test = pickle.load(f)
 	train = train[:, 0]
 	val = val[:, 0]
@@ -34,7 +34,8 @@ def naive_forecast():
 
 
 if __name__ == "__main__":
-	train_mae, val_mae, test_mae = naive_forecast()
+	fname = 'split_data.pkl'
+	train_mae, val_mae, test_mae = naive_forecast(fname)
 
 	print('Train MAE: {}\nVal MAE: {}\nTest MAE: {}'.format(train_mae, val_mae, test_mae))
 	# Probably no sense to use val and test for naive method, tbh

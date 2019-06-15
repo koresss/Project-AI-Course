@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import mean_absolute_error
 from baseline_naive import naive_forecast
 
-with open('split_data.pkl', 'rb') as f:
+fname = 'split_data.pkl'
+with open(fname, 'rb') as f:
 	train, val, test = pickle.load(f)
 
 train = train[:,0]
@@ -51,26 +52,24 @@ for alpha in np.linspace(0.1, 1, 30):
 			))
 	print('-'*30)
 
-plt.plot(forecast_train, label='forecasts')
+plt.plot(forecasts, label='forecasts')
 plt.plot(train, label='train')
 plt.legend()
 plt.show()
 
 forecast_val = np.ones(len(val))*forecasts[-1]
 
-naive_mae_train, naive_mae_val, naive_mae_test = naive_forecast()
+naive_mae_train, naive_mae_val, naive_mae_test = naive_forecast(fname)
 
 print('Train')
 train_mae = mean_absolute_error(forecast_train, train_temp)
 print('MAE: {} Naive MAE: {} MASE: {}'.format(train_mae, naive_mae_train, train_mae/naive_mae_train))
 
 print('Val')
-print('-'*30)
 val_mae = mean_absolute_error(forecast_val, val)
 print('MAE: {} Naive MAE: {} MASE: {}'.format(val_mae, naive_mae_val, val_mae/naive_mae_val))
 
 
 print('Test')
-print('-'*30)
 test_mae = mean_absolute_error(forecast_test, test)
 print('MAE: {} Naive MAE: {} MASE: {}'.format(test_mae, naive_mae_test, test_mae/naive_mae_test))

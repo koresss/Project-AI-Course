@@ -8,7 +8,8 @@ from sklearn.preprocessing import scale
 from baseline_naive import naive_forecast
 import matplotlib.pyplot as plt
 
-with open('synthetic_data.pkl', 'rb') as f:
+fname = 'split_data.pkl'
+with open(fname, 'rb') as f:
 	train, val, test = pickle.load(f)
 
 # Split the x and y vars
@@ -68,7 +69,7 @@ for elem in itertools.product(n_estims, subsamples, lrs):
 	print('n estim={}, subsample={}, lr={}\nTrain MAE: {}\nVal MAE: {}'.format(
 		  n_estim, subsample, lr, mae_train, mae_val))
 
-naive_mae_train, naive_mae_val, naive_mae_test = naive_forecast()
+naive_mae_train, naive_mae_val, naive_mae_test = naive_forecast(fname)
 
 print('-'*30)
 print('Best params found: {} with val MAE of {}'.format(best_params, best_val))
