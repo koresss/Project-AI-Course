@@ -3,7 +3,10 @@ import pickle
 import itertools
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.metrics import mean_absolute_error
+from sklearn.preprocessing import scale
+
 from baseline_naive import naive_forecast
+import matplotlib.pyplot as plt
 
 with open('split_data.pkl', 'rb') as f:
 	train, val, test = pickle.load(f)
@@ -44,7 +47,7 @@ for elem in itertools.product(n_estims, subsamples, lrs):
 	model = GradientBoostingRegressor(loss='lad',
 									  criterion='mae',
 									  learning_rate=lr,
-									  subsample=subsample,
+									  subsample=0.6,
 									  n_estimators=n_estim)
 
 	model.fit(x_train, y_train)
@@ -76,3 +79,17 @@ print('MASE val of best params: {}'.format(best_val/naive_mae_val))
 print('MASE test of best params: {}'.format(best_test/naive_mae_test))
 print('-'*30)
 
+n_estim, subsample, lr = best_params
+
+model = GradientBoostingRegressor(loss='lad',
+								  criterion='mae',
+								  learning_rate=lr,
+								  subsample=subsample,
+								  n_estimators=n_estim)
+
+model.fit(x_train, y_train)
+preds_test = model.predict(x_test)
+plt.plot(preds_test, label='pred')
+plt.plot(y_test, label='ground truth')
+plt.legend()
+plt.show()

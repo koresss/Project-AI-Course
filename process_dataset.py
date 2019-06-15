@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import datetime
 import pickle
-
 # Read csv, select a shop, drop date block num
 df = pd.read_csv('Dataset/sales_train_v2.csv')
 # df = df[df['shop_id']==31]
