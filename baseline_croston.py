@@ -10,6 +10,7 @@ with open('split_data.pkl', 'rb') as f:
 
 train = train[:,0]
 val = val[:,0]
+test = test[:,0]
 
 def crostons(train, alpha):
 	a = int(train[0])
@@ -44,6 +45,7 @@ for alpha in np.linspace(0.1, 1, 30):
 	forecasts = crostons(train, alpha)
 	forecast_val = np.ones(len(val))*forecasts[-1]
 	forecast_train = np.ones(len(train_temp))*forecasts[-1]
+	forecast_test = np.ones(len(test))*forecasts[-1]
 	print('Alpha = {} train MAE: {} val MAE: {}'.format(alpha, mean_absolute_error(forecast_train, train_temp),
 		  mean_absolute_error(forecast_val, val)
 			))
@@ -56,9 +58,19 @@ plt.show()
 
 forecast_val = np.ones(len(val))*forecasts[-1]
 
-naive_mae_train, naive_mae_val, test_mae_val = naive_forecast()
+naive_mae_train, naive_mae_val, naive_mae_test = naive_forecast()
 
+print('Train')
+train_mae = mean_absolute_error(forecast_train, train_temp)
+print('MAE: {} Naive MAE: {} MASE: {}'.format(train_mae, naive_mae_train, train_mae/naive_mae_train))
+
+print('Val')
 print('-'*30)
-print('VAL')
 val_mae = mean_absolute_error(forecast_val, val)
 print('MAE: {} Naive MAE: {} MASE: {}'.format(val_mae, naive_mae_val, val_mae/naive_mae_val))
+
+
+print('Test')
+print('-'*30)
+test_mae = mean_absolute_error(forecast_test, test)
+print('MAE: {} Naive MAE: {} MASE: {}'.format(test_mae, naive_mae_test, test_mae/naive_mae_test))

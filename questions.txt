@@ -17,4 +17,5 @@ Move to multivariate case -> add more time indexes (year, quarter, month, month 
 
 
 Questions saturday:
-	- For 1 step ahead prediction, should we do rolling prediction?
+	- Should we do 1 step ahead prediction for croston and gradient boosting?
+	- Template for poster?

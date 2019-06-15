@@ -33,7 +33,7 @@ subsamples = np.linspace(0, 1, 6)[1:]
 lrs = [0.01, 0.03, 0.1]
 
 best_val = 100
-best_train = 100
+
 
 for elem in itertools.product(n_estims, subsamples, lrs):
 	n_estim = elem[0]
@@ -50,20 +50,22 @@ for elem in itertools.product(n_estims, subsamples, lrs):
 	model.fit(x_train, y_train)
 	preds_train = model.predict(x_train)
 	preds_val = model.predict(x_val)
+	preds_test = model.predict(x_test)
 
 	mae_train = mean_absolute_error(y_train, preds_train)
 	mae_val = mean_absolute_error(y_val, preds_val)
-
-	if mae_train < best_train:
-		best_train = mae_train
+	mae_test = mean_absolute_error(y_test, preds_test)
 
 	if mae_val < best_val:
 		best_val = mae_val
+		best_train = mae_train
+		best_test = mae_test
 		best_params = elem
+
 	print('n estim={}, subsample={}, lr={}\nTrain MAE: {}\nVal MAE: {}'.format(
 		  n_estim, subsample, lr, mae_train, mae_val))
 
-naive_mae_train, naive_mae_val, test_mae_val = naive_forecast()
+naive_mae_train, naive_mae_val, naive_mae_test = naive_forecast()
 
 print('-'*30)
 print('Best params found: {} with val MAE of {}'.format(best_params, best_val))
@@ -71,3 +73,6 @@ print('Naive MAE val : ', naive_mae_val)
 print('-'*30)
 print('MASE train of best params: {}'.format(best_train/naive_mae_train))
 print('MASE val of best params: {}'.format(best_val/naive_mae_val))
+print('MASE test of best params: {}'.format(best_test/naive_mae_test))
+print('-'*30)
+
