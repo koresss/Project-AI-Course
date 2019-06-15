@@ -1,5 +1,7 @@
 import numpy as np
 import keras
+from sklearn.metrics import mean_absolute_error
+import baseline_naive
 
 keras.backend.clear_session()
 
@@ -108,9 +110,9 @@ def gen(data,batch_size, steps_per_epoch,
 			decoder_input = np.zeros((decoder_output.shape[0], decoder_output.shape[1], 1))
 			yield ([encoder_input, decoder_input], decoder_output)
 
-in_seq_len=60
+in_seq_len=30
 targ_seq_len=1
-epochs = 15
+epochs = 8
 #train_data_generator = gen(data=train[:600],batch_size=512,
 train_data_generator = gen(data=train,batch_size=512,
                                    steps_per_epoch=200,
@@ -121,19 +123,33 @@ val_data_generator = gen(data=val,batch_size=50,
                                    steps_per_epoch=200,
                                    input_sequence_length=in_seq_len,
                                    target_sequence_length=targ_seq_len,seed=1969)
-test_data_generator = gen(data=test,batch_size=50,
-                                   steps_per_epoch=200,
-                                   input_sequence_length=in_seq_len,
-                                   target_sequence_length=targ_seq_len,seed=1969)
+#test_data_generator = gen(data=test,batch_size=50,
+                                  # steps_per_epoch=200,
+                                   #input_sequence_length=in_seq_len,
+                                  # target_sequence_length=targ_seq_len,seed=1969)
 
 model.fit_generator(train_data_generator, steps_per_epoch=200, epochs=epochs,validation_data=val_data_generator,validation_steps=2)
 
-(x_encoder_test, x_decoder_test), y_test = next(test_data_generator) # x_decoder_test is composed of zeros.
-
-y_test_predicted = model.predict([x_encoder_test, x_decoder_test])
-print(y_test.shape)
-print(y_test_predicted.shape)
-groundtruth=np.append(x_encoder_test,y_test[0])
-plt.plot(np.append(x_encoder_test,y_test[0]),'g')
-plt.plot(range(groundtruth,groundtruth+targ_seq_len),y_test_predicted[0],'r')
+#(x_encoder_test, x_decoder_test), y_test = next(test_data_generator) # x_decoder_test is composed of zeros.
+all=np.append(np.append(train,val),test)
+idx=len(train)+len(val)
+preds=[]
+truths=[]
+for i in range(len(test)):
+	x_decoder_test = np.zeros((1, 1, 1))
+	x_encoder_test = np.expand_dims(np.expand_dims(all[idx+i-in_seq_len:idx+i],axis=1),axis=0)
+	#print(x_encoder_test.shape)
+	truths.append(all[idx+i])
+	preds.append(model.predict([x_encoder_test, x_decoder_test]))
+#print(y_test.shape) #(50,1,1)
+#print(y_test_predicted.shape) #(50,1,1)
+#print(x_encoder_test.shape) #(50,in_seq_len,1)
+#groundtruth=np.append(x_encoder_test[0],y_test[0])
+mae=mean_absolute_error(np.squeeze(truths), np.squeeze(preds))
+print(mae)
+_,_,maenaive = baseline_naive.naive_forecast()
+print(mae/maenaive)
+plt.plot(all,'g',label='truth')
+plt.plot(np.append(np.append(train,val),preds),'r',label='pred')
+plt.legend()
 plt.show()
