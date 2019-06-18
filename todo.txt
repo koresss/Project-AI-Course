@@ -1,0 +1,6 @@
+Switch to keras or pytorch (tensorflow 2 is buggy)
+
+- Add more lags to xgb (up to 30)
+- Experiment with more zeros between demans in synthetic data
+- Blank out data using a function (specific days, specific weeks in a month, combination etc.)
+- Try more products (multiple timeseries predictions)
