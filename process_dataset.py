@@ -49,19 +49,19 @@ df['day_num'] = np.arange(0, len(df), 1)
 df.columns = ['item_cnt_day', 'day_num']
 
 
-# Add lags
+# Add lags up to 30
 from pandas import Series
 from pandas import DataFrame
 from pandas import concat
-df = concat([df,
-			 df['item_cnt_day'].shift(1),
-			 df['item_cnt_day'].shift(2),
-			 df['item_cnt_day'].shift(3),
-			 ], axis=1)
-df.columns = ['item_cnt_day', 'day_num', 'lag1', 'lag2', 'lag3']
-# Remove first three rows as they would have NaNs
-df = df.iloc[3:]
-print(df.head(6))
+
+
+num_lags = 30
+for i in range(1,num_lags):
+	df['lag'+str(i)] = df['item_cnt_day'].shift(i)
+
+# Remove first rows as they would have NaNs
+df = df.iloc[num_lags:]
+print(df.head(10))
 # Add cumulative zeros column
 # TODO
 
