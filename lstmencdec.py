@@ -5,7 +5,7 @@ import baseline_naive
 
 keras.backend.clear_session()
 
-layers = [10, 10] # Number of hidden neuros in each layer of the encoder and decoder
+layers = [20, 20] # Number of hidden neuros in each layer of the encoder and decoder
 
 learning_rate = 0.01
 decay = 0 # Learning rate decay
@@ -20,8 +20,8 @@ loss = "mean_absolute_error" # Other loss functions are possible, see Keras docu
 
 # Regularisation isn't really needed for this application
 lambda_regulariser = 0.000001 # Will not be used if regulariser is None
-regulariser = None # Possible regulariser: keras.regularizers.l2(lambda_regulariser)
-
+#regulariser = keras.regularizers.l2(lambda_regulariser) # Possible regulariser: keras.regularizers.l2(lambda_regulariser)
+regulariser=None
 encoder_inputs = keras.layers.Input(shape=(None, num_input_features))
 
 # Create a list of RNN Cells, these are then concatenated into a single layer
@@ -80,13 +80,15 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 
-train,val,test=pkl.load(open('split_data.pkl','rb'))
+train,val,test=pkl.load(open('synthetic_data.pkl','rb'))
 train=train.squeeze()[:,0]
 #print(train)
 #print(train[:,0])
 val=val.squeeze()[:,0]
 test=test.squeeze()[:,0]
-
+#train=(train-np.mean(train))/np.std(train)
+#val=(val-np.mean(val))/np.std(val)
+#test=(test-np.mean(test))/np.std(test)
 def gen(data,batch_size, steps_per_epoch,
 				input_sequence_length, target_sequence_length,seed=43):
 	num_points = input_sequence_length + target_sequence_length
@@ -112,7 +114,7 @@ def gen(data,batch_size, steps_per_epoch,
 
 in_seq_len=30
 targ_seq_len=1
-epochs = 8
+epochs = 10
 #train_data_generator = gen(data=train[:600],batch_size=512,
 train_data_generator = gen(data=train,batch_size=512,
                                    steps_per_epoch=200,
@@ -147,7 +149,7 @@ for i in range(len(test)):
 #groundtruth=np.append(x_encoder_test[0],y_test[0])
 mae=mean_absolute_error(np.squeeze(truths), np.squeeze(preds))
 print(mae)
-_,_,maenaive = baseline_naive.naive_forecast()
+_,_,maenaive = baseline_naive.naive_forecast('synthetic_data.pkl')
 print(mae/maenaive)
 plt.plot(all,'g',label='truth')
 plt.plot(np.append(np.append(train,val),preds),'r',label='pred')
