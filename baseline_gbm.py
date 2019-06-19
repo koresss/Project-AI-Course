@@ -17,6 +17,7 @@ x_train, y_train = train[:,1:], train[:,0]
 x_val, y_val = val[:, 1:], val[:, 0]
 x_test, y_test = test[:, 1:], test[:, 0]
 print(x_train.shape)
+print(x_train[:10])
 # x_train = x_train.reshape(-1, 1)
 # x_val = x_val.reshape(-1, 1)
 # x_test = x_test.reshape(-1, 1)

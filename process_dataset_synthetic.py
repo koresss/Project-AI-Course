@@ -10,8 +10,8 @@ df.drop('date_block_num', axis=1, inplace=True)
 
 # Select pink floyd dark side of the moon albums
 
-df = df[df['item_id'].isin([5466,5467,5468,5469,5470])]
-# df = df[df['shop_id'].isin([45])]
+# df = df[df['item_id'].isin([5466,5467,5468,5469,5470])]
+df = df[df['shop_id'].isin([45])]
 # df = df[df['item_id'].isin([8885])]
 # Convert date to datetime obj, sort by it, sum item counts per day
 df['date'] = pd.to_datetime(df['date'])#.apply(lambda x: x.toordinal())
@@ -31,13 +31,13 @@ print(df[df['item_cnt_day'] == 0.0].count())
 
 
 # Create synthetic intermittent data
-# vals = df.values
-# vals2 = np.copy(vals)
-# for idx, elem in enumerate(vals):
-# 	if idx%30==0 and idx!=0:
-# 		vals2 = np.insert(vals2, idx, np.zeros(np.random.randint(7,15)))
+vals = df.values
+vals2 = np.copy(vals)
+for idx, elem in enumerate(vals):
+	if idx%30==0 and idx!=0:
+		vals2 = np.insert(vals2, idx, np.zeros(np.random.randint(7,15)))
 
-# df = pd.DataFrame(vals2)
+df = pd.DataFrame(vals2)
 
 
 # Encode day of week as cyclical feature
@@ -74,5 +74,5 @@ df = df.values
 train, val, test = np.split(df, [int(0.8*len(df)), int(0.9*len(df))], axis=0)
 
 
-with open('split_data.pkl', 'wb') as f:
+with open('synthetic_data.pkl', 'wb') as f:
 	pickle.dump((train,val,test), f)
