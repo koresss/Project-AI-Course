@@ -39,6 +39,33 @@ def crostons(train, alpha):
 
 	return forecasts
 
+def tsb(train, alpha, beta):
+	a = int(train[0])
+	p = 1
+	# q is time elapsed since previous demand occurence
+	q = 0
+	forecasts = []
+
+	for idx,elem in enumerate(train[1:], start=1):
+		# If we have a demand occurence, update a and p
+		if elem != 0:
+			a = alpha*elem + (1-alpha)*a
+			p = beta + (1-beta)*p
+			q = 1
+		# If not, no need to update a and p
+		# but need to keep track of q
+		if elem==0:
+			q += 1
+			p = (1-beta)*p
+		try:
+			forecast = a*p
+		except:
+			forecast = 0
+		forecasts.append(forecast)
+
+	return forecasts
+
+
 train_temp = np.delete(train, 0)
 train_temp = train_temp.tolist()
 
@@ -69,6 +96,8 @@ forecast_test = np.ones(len(test))*forecasts[-1]
 
 plt.plot(forecasts, label='forecasts')
 plt.plot(train, label='train')
+plt.grid()
+plt.title("Croston's method prediction")
 plt.legend()
 plt.show()
 

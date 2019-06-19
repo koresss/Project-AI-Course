@@ -7,6 +7,7 @@ from sklearn.preprocessing import scale
 
 from baseline_naive import naive_forecast
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 fname = 'synthetic_data_1.pkl'
 with open(fname, 'rb') as f:
@@ -22,17 +23,6 @@ print(x_train[:10])
 # x_val = x_val.reshape(-1, 1)
 # x_test = x_test.reshape(-1, 1)
 
-model = GradientBoostingRegressor(loss='lad', learning_rate=0.01, n_estimators=100,
-								 )
-model.fit(x_train, y_train)
-
-preds_train = model.predict(x_train)
-preds_val = model.predict(x_val)
-
-print('Train MAE:', mean_absolute_error(y_train, preds_train))
-print('Val MAE:', mean_absolute_error(y_val, preds_val))
-
-
 n_estims = [40, 100, 160, 240, 300]
 subsamples = np.linspace(0, 1, 5)[1:]
 # subsamples = [1]
@@ -47,7 +37,7 @@ for elem in itertools.product(n_estims, subsamples, lrs):
 	print('-'*30)
 	
 	model = GradientBoostingRegressor(loss='lad',
-									  criterion='mae',
+									  criterion='friedman_mse',
 									  learning_rate=lr,
 									  subsample=subsample,
 									  n_estimators=n_estim)
@@ -84,7 +74,7 @@ print('-'*30)
 n_estim, subsample, lr = best_params
 
 model = GradientBoostingRegressor(loss='lad',
-								  criterion='mae',
+								  criterion='friedman_mse',
 								  learning_rate=lr,
 								  subsample=subsample,
 								  n_estimators=n_estim)
@@ -95,10 +85,14 @@ preds_train = model.predict(x_train)
 
 plt.plot(preds_train, label='pred')
 plt.plot(y_train, label='ground truth')
+plt.grid()
+plt.title('GBM Training data')
 plt.legend()
 plt.show()
 
 plt.plot(preds_test, label='pred')
 plt.plot(y_test, label='ground truth')
 plt.legend()
+plt.grid()
+plt.title('GBM Testing data')
 plt.show()
