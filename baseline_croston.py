@@ -1,11 +1,11 @@
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
-
+import itertools
 from sklearn.metrics import mean_absolute_error
 from baseline_naive import naive_forecast
 
-fname = 'synthetic_data_4.pkl'
+fname = 'synthetic_data_month.pkl'
 with open(fname, 'rb') as f:
 	train, val, test = pickle.load(f)
 
@@ -83,10 +83,10 @@ for alpha in np.linspace(0.01, 0.99, 30):
 		best_mae = mae_val
 		best_alpha = alpha
 
-	print('Alpha = {} train MAE: {} val MAE: {}'.format(alpha, mae_train, mae_val))
-	print('-'*30)
+	# print('Alpha = {} train MAE: {} val MAE: {}'.format(alpha, mae_train, mae_val))
+	# print('-'*30)
 
-print('Best alpha : ', best_alpha)
+
 
 forecasts = crostons(train, best_alpha)
 forecast_val = np.ones(len(val))*forecasts[-1]
@@ -101,6 +101,54 @@ plt.title("Croston's method prediction")
 plt.legend()
 plt.show()
 
+naive_mae_train, naive_mae_val, naive_mae_test = naive_forecast(fname)
+print('*'*10+'Croston'+'*'*10)
+print('Best alpha : ', best_alpha)
+print('Train')
+train_mae = mean_absolute_error(forecast_train, train_temp)
+print('MAE: {} Naive MAE: {} MASE: {}'.format(train_mae, naive_mae_train, train_mae/naive_mae_train))
+
+print('Val')
+val_mae = mean_absolute_error(forecast_val, val)
+print('MAE: {} Naive MAE: {} MASE: {}'.format(val_mae, naive_mae_val, val_mae/naive_mae_val))
+
+
+print('Test')
+test_mae = mean_absolute_error(forecast_test, test)
+print('MAE: {} Naive MAE: {} MASE: {}'.format(test_mae, naive_mae_test, test_mae/naive_mae_test))
+
+
+range_params = np.linspace(0, 1, 30)
+best_mae = 100
+for alpha,beta in itertools.product(range_params, range_params):
+	forecasts = tsb(train, alpha,beta)
+	forecast_val = np.ones(len(val))*forecasts[-1]
+	forecast_train = np.ones(len(train_temp))*forecasts[-1]
+
+	mae_train = mean_absolute_error(forecasts, train_temp)
+	mae_val = mean_absolute_error(forecast_val, val)
+
+	if mae_val < best_mae:
+		best_mae = mae_val
+		best_params = (alpha, beta)
+
+alpha, beta = best_params
+
+forecasts = tsb(train, alpha, beta)
+forecast_val = np.ones(len(val))*forecasts[-1]
+forecast_val = np.ones(len(val))*forecasts[-1]
+forecast_train = np.ones(len(train_temp))*forecasts[-1]
+forecast_test = np.ones(len(test))*forecasts[-1]
+
+plt.plot(forecasts, label='forecasts')
+plt.plot(train, label='train')
+plt.grid()
+plt.title("TSB method prediction")
+plt.legend()
+plt.show()
+
+print('*'*10 + 'TSB' + '*'*10)
+print('Best alpha : {} Best beta : {}'.format(alpha, beta))
 naive_mae_train, naive_mae_val, naive_mae_test = naive_forecast(fname)
 
 print('Train')
