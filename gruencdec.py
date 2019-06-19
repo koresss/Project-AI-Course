@@ -12,33 +12,34 @@ seed(1)
 set_random_seed(2)
 np.random.seed(42)
 
-#keras.backend.clear_session()
+keras.backend.clear_session()
 sess=tf.Session(graph=tf.get_default_graph())
 K.set_session(sess)
 
-layers = [5, 5] # Number of hidden neuros in each layer of the encoder and decoder
+layers = [20, 20] # Number of hidden neuros in each layer of the encoder and decoder
 
 learning_rate = 0.01
 decay = 0 # Learning rate decay
 optimiser = keras.optimizers.Adam(lr=learning_rate, decay=decay) # Other possible optimiser "sgd" (Stochastic Gradient Descent)
 
-num_input_features = 3 # The dimensionality of the input at each time step. In this case a 1D signal.
+num_input_features = 1 # The dimensionality of the input at each time step. In this case a 1D signal.
 num_output_features = 1 # The dimensionality of the output at each time step. In this case a 1D signal.
 # There is no reason for the input sequence to be of same dimension as the ouput sequence.
 # For instance, using 3 input signals: consumer confidence, inflation and house prices to predict the future house prices.
 
-loss = "mse" # Other loss functions are possible, see Keras documentation.
+loss = "mean_absolute_error" # Other loss functions are possible, see Keras documentation.
+
 # Regularisation isn't really needed for this application
 lambda_regulariser = 0.000001 # Will not be used if regulariser is None
-regulariser = keras.regularizers.l2(lambda_regulariser) # Possible regulariser: keras.regularizers.l2(lambda_regulariser)
-#regulariser=None
+#regulariser = keras.regularizers.l2(lambda_regulariser) # Possible regulariser: keras.regularizers.l2(lambda_regulariser)
+regulariser=None
 encoder_inputs = keras.layers.Input(shape=(None, num_input_features))
 
 # Create a list of RNN Cells, these are then concatenated into a single layer
 # with the RNN layer.
 encoder_cells = []
 for hidden_neurons in layers:
-  encoder_cells.append(keras.layers.LSTMCell(hidden_neurons,
+  encoder_cells.append(keras.layers.GRUCell(hidden_neurons,
                                               kernel_regularizer=regulariser,
                                               recurrent_regularizer=regulariser,
                                               bias_regularizer=regulariser))
@@ -57,7 +58,7 @@ decoder_inputs = keras.layers.Input(shape=(None, 1))
 
 decoder_cells = []
 for hidden_neurons in layers:
-  decoder_cells.append(keras.layers.LSTMCell(hidden_neurons,
+  decoder_cells.append(keras.layers.GRUCell(hidden_neurons,
                                               kernel_regularizer=regulariser,
                                               recurrent_regularizer=regulariser,
                                               bias_regularizer=regulariser))
@@ -89,26 +90,16 @@ import pickle as pkl
 import numpy as np
 import random
 import matplotlib.pyplot as plt
-file='synthetic_data_1.pkl'
-train,val,test=pkl.load(open(file,'rb'))
-train=train.squeeze()[:,0:3]#add col 1 and 2
+
+train,val,test=pkl.load(open('synthetic_data.pkl','rb'))
+train=train.squeeze()[:,0]
 #print(train)
 #print(train[:,0])
-val=val.squeeze()[:,0:3]
-test=test.squeeze()[:,0:3]
-#print('train',train.shape)
-#print('val',val.shape)
-#print('test',test.shape)
-val_orig=val.copy()
-means=[np.mean(train[:,0]),np.mean(train[:,1]),np.mean(train[:,2])]
-stds=[np.std(train[:,0]),np.std(train[:,1]),np.std(train[:,2])]
-for i in range(3):
-	train[:,i]=(train[:,i]-means[i])/stds[i]
-	val[:,i]=(val[:,i]-means[i])/stds[i]
-	test[:,i]=(test[:,i]-means[i])/stds[i]
-train=(train-np.mean(train))/np.std(train)
-val=(val-np.mean(val))/np.std(val)
-test=(test-np.mean(test))/np.std(test)
+val=val.squeeze()[:,0]
+test=test.squeeze()[:,0]
+#train=(train-np.mean(train))/np.std(train)
+#val=(val-np.mean(val))/np.std(val)
+#test=(test-np.mean(test))/np.std(test)
 def gen(data,batch_size, steps_per_epoch,
 				input_sequence_length, target_sequence_length):
 	num_points = input_sequence_length + target_sequence_length
@@ -118,60 +109,60 @@ def gen(data,batch_size, steps_per_epoch,
 		
 
 		for _ in range(steps_per_epoch):
-			signals = np.zeros((batch_size, num_points,3))
+			signals = np.zeros((batch_size, num_points))
 			for i in range(batch_size):
 				idx=np.random.randint(0,len(data)-num_points-1)
+				#print(data[idx:idx+num_points])
 				signals[i]=data[idx:idx+num_points]
+			signals = np.expand_dims(signals, axis=2)
+			
 			encoder_input = signals[:, :input_sequence_length, :]
-			decoder_output = signals[:, input_sequence_length:,0]#, :]
-			decoder_output=np.expand_dims(decoder_output,axis=2)
+			decoder_output = signals[:, input_sequence_length:, :]
+			
 			# The output of the generator must be ([encoder_input, decoder_input], [decoder_output])
 			decoder_input = np.zeros((decoder_output.shape[0], decoder_output.shape[1], 1))
-			yield ([encoder_input.squeeze(), decoder_input], decoder_output)
+			yield ([encoder_input, decoder_input], decoder_output)
 
 in_seq_len=30
 targ_seq_len=1
-epochs = 1
-train_data_generator = gen(data=train,batch_size=64,
+epochs = 10
+#train_data_generator = gen(data=train[:600],batch_size=512,
+train_data_generator = gen(data=train,batch_size=512,
                                    steps_per_epoch=200,
                                    input_sequence_length=in_seq_len,
                                    target_sequence_length=targ_seq_len)
+#val_data_generator = gen(data=np.append(train[600:],val),batch_size=50,
 val_data_generator = gen(data=val,batch_size=50,
                                    steps_per_epoch=200,
                                    input_sequence_length=in_seq_len,
                                    target_sequence_length=targ_seq_len)
+#test_data_generator = gen(data=test,batch_size=50,
+                                  # steps_per_epoch=200,
+                                   #input_sequence_length=in_seq_len,
+                                  # target_sequence_length=targ_seq_len,seed=1969)
+
 model.fit_generator(train_data_generator, steps_per_epoch=200, epochs=epochs,validation_data=val_data_generator,validation_steps=2)
 
 #(x_encoder_test, x_decoder_test), y_test = next(test_data_generator) # x_decoder_test is composed of zeros.
-all=np.append(np.append(train,val,axis=0),test,axis=0)
+all=np.append(np.append(train,val),test)
 idx=len(train)+len(val)
 preds=[]
 truths=[]
 for i in range(len(test)):
 	x_decoder_test = np.zeros((1, 1, 1))
 	x_encoder_test = np.expand_dims(np.expand_dims(all[idx+i-in_seq_len:idx+i],axis=1),axis=0)
-	truths.append(all[idx+i,0])
-	p=np.squeeze(model.predict([x_encoder_test.squeeze(axis=2), x_decoder_test]))
-	preds.append(p)
-preds=(np.array(preds)*stds[0])+means[0]
-truths=(np.array(truths)*stds[0])+means[0]
-#preds=scaler.inverse_transform(preds)
-#truths=scaler.inverse_transform(truths)
+	#print(x_encoder_test.shape)
+	truths.append(all[idx+i])
+	preds.append(model.predict([x_encoder_test, x_decoder_test]))
+#print(y_test.shape) #(50,1,1)
+#print(y_test_predicted.shape) #(50,1,1)
+#print(x_encoder_test.shape) #(50,in_seq_len,1)
+#groundtruth=np.append(x_encoder_test[0],y_test[0])
 mae=mean_absolute_error(np.squeeze(truths), np.squeeze(preds))
 print(mae)
-_,_,maenaive = baseline_naive.naive_forecast(file)
-print(mae/maenaive)
-#all=(all*stds[0])+means[0]
-tr=(train[:,0]*stds[0])+means[0]
-te=(test[:,0]*stds[0])+means[0]
-all=np.append(np.append(tr,val_orig[:,0]),te)
-#all=scaler.inverse_transform(all)
+_,_,maenaive = baseline_naive.naive_forecast('synthetic_data.pkl')
+print('mae frac: ',mae/maenaive)
 plt.plot(all,'g',label='truth')
-for i in range(3):
-	train[:,i]=(train[:,i]*stds[i])+means[i]
-	#val[:,i]=(val[:,i]*stds[i])+means[i]
-#train=scaler.inverse_transform(train)
-#val=scaler.inverse_transform(val)
-plt.plot(np.append(np.append(train[:,0],val_orig[:,0]),preds),'r',label='pred')
+plt.plot(np.append(np.append(train,val),preds),'r',label='pred')
 plt.legend()
 plt.show()
