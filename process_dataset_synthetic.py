@@ -30,15 +30,6 @@ df = pd.DataFrame(df)
 print(df[df['item_cnt_day'] == 0.0].count())
 
 
-# Create synthetic intermittent data
-# vals = df.values
-# vals2 = np.copy(vals)
-# for idx, elem in enumerate(vals):
-# 	if idx%30==0 and idx!=0:
-# 		vals2 = np.insert(vals2, idx, np.zeros(np.random.randint(7,15)))
-
-# df = pd.DataFrame(vals2)
-
 
 # Encode day of week as cyclical feature
 df['day_num'] = np.arange(0, len(df), 1)
@@ -57,8 +48,7 @@ for i,elem in enumerate(dows):
 		vals[i] = 0
 
 df['item_cnt_day'] = vals
-print(df[['item_cnt_day', 'dow']].head(30))
-# df.drop(labels=['day_num', 'dow'], axis=1, inplace=True)
+df.drop(labels=['day_num', 'dow'], axis=1, inplace=True)
 
 
 # Add lags up to 30
@@ -72,7 +62,7 @@ for i in range(1,num_lags):
 
 # Remove first rows as they would have NaNs
 df = df.iloc[num_lags:]
-print(df[['item_cnt_day', 'dow']].head(30))
+
 # Add cumulative zeros column
 # TODO
 
@@ -81,10 +71,11 @@ print(df[['item_cnt_day', 'dow']].head(30))
 plt.plot(df['item_cnt_day'])
 plt.show()
 # Convert to np array
+print(df.columns)
+print(df.head(10))
 df = df.values
 # Split to train val test
 train, val, test = np.split(df, [int(0.8*len(df)), int(0.9*len(df))], axis=0)
 
-
-with open('synthetic_data_4.pkl', 'wb') as f:
+with open('synthetic_data_' + str(len(vals_to_zero_out)) + '.pkl', 'wb') as f:
 	pickle.dump((train,val,test), f)

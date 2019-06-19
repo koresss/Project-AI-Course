@@ -8,7 +8,7 @@ from sklearn.preprocessing import scale
 from baseline_naive import naive_forecast
 import matplotlib.pyplot as plt
 
-fname = 'synthetic_data.pkl'
+fname = 'synthetic_data_1.pkl'
 with open(fname, 'rb') as f:
 	train, val, test = pickle.load(f)
 
@@ -33,10 +33,10 @@ print('Train MAE:', mean_absolute_error(y_train, preds_train))
 print('Val MAE:', mean_absolute_error(y_val, preds_val))
 
 
-n_estims = [40, 100, 160, 240, 300, 360]
-subsamples = np.linspace(0, 1, 8)[1:]
+n_estims = [40, 100, 160, 240, 300]
+subsamples = np.linspace(0, 1, 5)[1:]
 # subsamples = [1]
-lrs = [0.003, 0.01, 0.03, 0.1]
+lrs = [0.01, 0.03, 0.1]
 best_val = 100
 
 

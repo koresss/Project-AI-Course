@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import mean_absolute_error
 from baseline_naive import naive_forecast
 
-fname = 'synthetic_data.pkl'
+fname = 'synthetic_data_4.pkl'
 with open(fname, 'rb') as f:
 	train, val, test = pickle.load(f)
 
