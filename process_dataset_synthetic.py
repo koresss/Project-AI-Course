@@ -41,15 +41,21 @@ df['dow_cos'] = np.cos(2 * np.pi * df['dow']/6.0)
 # Insert zeros depending on day number
 vals = df['item_cnt_day'].values
 dows = df['dow'].values
-
-vals_to_zero_out = [0, 1, 2, 3]
+vals_to_zero_out = [0, 1]
 for i,elem in enumerate(dows):
 	if elem in vals_to_zero_out:
 		vals[i] = 0
 
-df['item_cnt_day'] = vals
-df.drop(labels=['day_num', 'dow'], axis=1, inplace=True)
+# df['item_cnt_day'] = vals
 
+# Zero out an entire month per year
+day_count = df['day_num'].values
+vals = df['item_cnt_day'].values
+for i,elem in enumerate(day_count):
+	if elem%365 in range(90,120):
+		vals[i] = 0
+# Drop useless cols
+df.drop(labels=['day_num', 'dow'], axis=1, inplace=True)
 
 # Add lags up to 30
 from pandas import Series
@@ -77,5 +83,7 @@ df = df.values
 # Split to train val test
 train, val, test = np.split(df, [int(0.8*len(df)), int(0.9*len(df))], axis=0)
 
-with open('synthetic_data_' + str(len(vals_to_zero_out)) + '.pkl', 'wb') as f:
+with open('synthetic_data_combined_2days.pkl', 'wb') as f:
 	pickle.dump((train,val,test), f)
+# with open('synthetic_data_' + str(len(vals_to_zero_out)) + '.pkl', 'wb') as f:
+# 	pickle.dump((train,val,test), f)
