@@ -16,7 +16,7 @@ np.random.seed(42)
 sess=tf.Session(graph=tf.get_default_graph())
 K.set_session(sess)
 
-layers = [5, 5] # Number of hidden neuros in each layer of the encoder and decoder
+layers = [30, 30] # Number of hidden neuros in each layer of the encoder and decoder
 
 learning_rate = 0.01
 decay = 0 # Learning rate decay
@@ -30,8 +30,8 @@ num_output_features = 1 # The dimensionality of the output at each time step. In
 loss = "mse" # Other loss functions are possible, see Keras documentation.
 # Regularisation isn't really needed for this application
 lambda_regulariser = 0.000001 # Will not be used if regulariser is None
-regulariser = keras.regularizers.l2(lambda_regulariser) # Possible regulariser: keras.regularizers.l2(lambda_regulariser)
-#regulariser=None
+#regulariser = keras.regularizers.l2(lambda_regulariser) # Possible regulariser: keras.regularizers.l2(lambda_regulariser)
+regulariser=None
 encoder_inputs = keras.layers.Input(shape=(None, num_input_features))
 
 # Create a list of RNN Cells, these are then concatenated into a single layer
@@ -89,7 +89,7 @@ import pickle as pkl
 import numpy as np
 import random
 import matplotlib.pyplot as plt
-file='synthetic_data_1.pkl'
+file='synthetic_data_4.pkl'
 train,val,test=pkl.load(open(file,'rb'))
 train=train.squeeze()[:,0:3]#add col 1 and 2
 #print(train)
@@ -100,6 +100,7 @@ test=test.squeeze()[:,0:3]
 #print('val',val.shape)
 #print('test',test.shape)
 val_orig=val.copy()
+test_orig=test.copy()
 means=[np.mean(train[:,0]),np.mean(train[:,1]),np.mean(train[:,2])]
 stds=[np.std(train[:,0]),np.std(train[:,1]),np.std(train[:,2])]
 for i in range(3):
@@ -131,47 +132,57 @@ def gen(data,batch_size, steps_per_epoch,
 
 in_seq_len=30
 targ_seq_len=1
-epochs = 1
-train_data_generator = gen(data=train,batch_size=64,
-                                   steps_per_epoch=200,
+epochs = 10
+steps=100
+train_data_generator = gen(data=train,batch_size=32,
+                                   steps_per_epoch=steps,
                                    input_sequence_length=in_seq_len,
                                    target_sequence_length=targ_seq_len)
-val_data_generator = gen(data=val,batch_size=50,
-                                   steps_per_epoch=200,
+val_data_generator = gen(data=val,batch_size=10,
+                                   steps_per_epoch=steps,
                                    input_sequence_length=in_seq_len,
                                    target_sequence_length=targ_seq_len)
-model.fit_generator(train_data_generator, steps_per_epoch=200, epochs=epochs,validation_data=val_data_generator,validation_steps=2)
+model.fit_generator(train_data_generator, steps_per_epoch=steps, epochs=epochs,validation_data=val_data_generator,validation_steps=3)
 
-#(x_encoder_test, x_decoder_test), y_test = next(test_data_generator) # x_decoder_test is composed of zeros.
+
 all=np.append(np.append(train,val,axis=0),test,axis=0)
 idx=len(train)+len(val)
 preds=[]
 truths=[]
+train_preds=[]
+#train_truths=[]
 for i in range(len(test)):
 	x_decoder_test = np.zeros((1, 1, 1))
 	x_encoder_test = np.expand_dims(np.expand_dims(all[idx+i-in_seq_len:idx+i],axis=1),axis=0)
 	truths.append(all[idx+i,0])
 	p=np.squeeze(model.predict([x_encoder_test.squeeze(axis=2), x_decoder_test]))
 	preds.append(p)
+idx=30
+for i in range(len(train)+len(val)-30):
+	x_decoder_test = np.zeros((1, 1, 1))
+	x_encoder_test = np.expand_dims(np.expand_dims(all[idx+i-in_seq_len:idx+i],axis=1),axis=0)
+	#train_truths.append(all[idx+i,0])
+	p=np.squeeze(model.predict([x_encoder_test.squeeze(axis=2), x_decoder_test]))
+	train_preds.append(p)
 preds=(np.array(preds)*stds[0])+means[0]
 truths=(np.array(truths)*stds[0])+means[0]
-#preds=scaler.inverse_transform(preds)
-#truths=scaler.inverse_transform(truths)
+train_preds=(np.array(train_preds)*stds[0])+means[0]
+#train_truths=(np.array(truths)*stds[0])+means[0]
 mae=mean_absolute_error(np.squeeze(truths), np.squeeze(preds))
 print(mae)
 _,_,maenaive = baseline_naive.naive_forecast(file)
 print(mae/maenaive)
-#all=(all*stds[0])+means[0]
+#plot train+val
 tr=(train[:,0]*stds[0])+means[0]
-te=(test[:,0]*stds[0])+means[0]
-all=np.append(np.append(tr,val_orig[:,0]),te)
-#all=scaler.inverse_transform(all)
+all=np.append(np.append(tr,val_orig[:,0]),test_orig[:,0])
+plt.plot(all,'g',label='truth')
+plt.plot(train_preds,'r',label='pred')
+plt.legend()
+plt.show()
+#plot test
 plt.plot(all,'g',label='truth')
 for i in range(3):
 	train[:,i]=(train[:,i]*stds[i])+means[i]
-	#val[:,i]=(val[:,i]*stds[i])+means[i]
-#train=scaler.inverse_transform(train)
-#val=scaler.inverse_transform(val)
 plt.plot(np.append(np.append(train[:,0],val_orig[:,0]),preds),'r',label='pred')
 plt.legend()
 plt.show()
