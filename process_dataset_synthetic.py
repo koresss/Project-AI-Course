@@ -27,6 +27,14 @@ df = df.reindex(idx, fill_value=0)
 
 df = pd.DataFrame(df)
 
+plt.subplot(1, 2, 1)
+plt.plot(df['item_cnt_day'])
+plt.grid()
+plt.title("Dataset before processing")
+plt.xlabel('Day num.')
+plt.ylabel('# sold')
+# plt.show()
+
 print(df[df['item_cnt_day'] == 0.0].count())
 
 
@@ -39,12 +47,12 @@ df['dow_sin'] = np.sin(2 * np.pi * df['dow']/6.0)
 df['dow_cos'] = np.cos(2 * np.pi * df['dow']/6.0)
 
 # Insert zeros depending on day number
-vals = df['item_cnt_day'].values
-dows = df['dow'].values
-vals_to_zero_out = [0, 1]
-for i,elem in enumerate(dows):
-	if elem in vals_to_zero_out:
-		vals[i] = 0
+# vals = df['item_cnt_day'].values
+# dows = df['dow'].values
+# vals_to_zero_out = [0, 1]
+# for i,elem in enumerate(dows):
+# 	if elem in vals_to_zero_out:
+# 		vals[i] = 0
 
 # df['item_cnt_day'] = vals
 
@@ -52,7 +60,7 @@ for i,elem in enumerate(dows):
 day_count = df['day_num'].values
 vals = df['item_cnt_day'].values
 for i,elem in enumerate(day_count):
-	if elem%365 in range(90,120):
+	if elem%365 in range(90,120) or elem%365 in range(210,240):
 		vals[i] = 0
 # Drop useless cols
 df.drop(labels=['day_num', 'dow'], axis=1, inplace=True)
@@ -74,7 +82,12 @@ df = df.iloc[num_lags:]
 
 # Cut to first 1000 elems only
 # df = df.head(1000)
+plt.subplot(1, 2, 2)
 plt.plot(df['item_cnt_day'])
+plt.grid()
+plt.title("Dataset after processing")
+plt.xlabel('Date')
+plt.ylabel('# sold')
 plt.show()
 # Convert to np array
 print(df.columns)
@@ -83,7 +96,7 @@ df = df.values
 # Split to train val test
 train, val, test = np.split(df, [int(0.8*len(df)), int(0.9*len(df))], axis=0)
 
-with open('synthetic_data_combined_2days.pkl', 'wb') as f:
+with open('synthetic_data_month.pkl', 'wb') as f:
 	pickle.dump((train,val,test), f)
 # with open('synthetic_data_' + str(len(vals_to_zero_out)) + '.pkl', 'wb') as f:
 # 	pickle.dump((train,val,test), f)
