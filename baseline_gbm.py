@@ -9,7 +9,7 @@ from baseline_naive import naive_forecast
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-fname = 'synthetic_data_month.pkl'
+fname = 'synthetic_data_1.pkl'
 with open(fname, 'rb') as f:
 	train, val, test = pickle.load(f)
 

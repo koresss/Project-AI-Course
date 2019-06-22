@@ -1,12 +1,15 @@
 import numpy as np
 import keras
+import baseline_naive
+import tensorflow as tf
+import os
+
 from keras import backend as K
 from sklearn.metrics import mean_absolute_error
-import baseline_naive
 from tensorflow import set_random_seed
-import tensorflow as tf
 from random import seed
-import os
+from keras.callbacks import EarlyStopping, LearningRateScheduler, ReduceLROnPlateau, ModelCheckpoint
+
 os.environ['PYTHONHASHSEED']=str(1)
 seed(1)
 set_random_seed(2)
@@ -16,11 +19,11 @@ np.random.seed(42)
 sess=tf.Session(graph=tf.get_default_graph())
 K.set_session(sess)
 
-layers = [30, 30] # Number of hidden neuros in each layer of the encoder and decoder
+layers = [10, 10] # Number of hidden neuros in each layer of the encoder and decoder
 
-learning_rate = 0.01
+learning_rate = 0.002
 decay = 0 # Learning rate decay
-optimiser = keras.optimizers.Adam(lr=learning_rate, decay=decay) # Other possible optimiser "sgd" (Stochastic Gradient Descent)
+optimiser = keras.optimizers.Adam(lr=learning_rate, decay=decay, amsgrad=True) # Other possible optimiser "sgd" (Stochastic Gradient Descent)
 
 num_input_features = 3 # The dimensionality of the input at each time step. In this case a 1D signal.
 num_output_features = 1 # The dimensionality of the output at each time step. In this case a 1D signal.
@@ -89,7 +92,7 @@ import pickle as pkl
 import numpy as np
 import random
 import matplotlib.pyplot as plt
-file='synthetic_data_4.pkl'
+file='synthetic_data_1.pkl'
 train,val,test=pkl.load(open(file,'rb'))
 train=train.squeeze()[:,0:3]#add col 1 and 2
 #print(train)
@@ -142,7 +145,18 @@ val_data_generator = gen(data=val,batch_size=10,
                                    steps_per_epoch=steps,
                                    input_sequence_length=in_seq_len,
                                    target_sequence_length=targ_seq_len)
-model.fit_generator(train_data_generator, steps_per_epoch=steps, epochs=epochs,validation_data=val_data_generator,validation_steps=3)
+
+
+lr_reducer = ReduceLROnPlateau(monitor='val_loss', factor=0.3, patience=2, cooldown=0)
+early_stopper = EarlyStopping(monitor='val_loss', patience=10)
+checkpoint = ModelCheckpoint('best_lstm.h5', monitor='val_loss', verbose=1, save_best_only=True, period=1)
+lr_scheduler = LearningRateScheduler(lambda x: 1. / (1. + x))
+model.fit_generator(train_data_generator,
+					steps_per_epoch=steps,
+					epochs=epochs,
+					validation_data=val_data_generator,
+					validation_steps=3,
+					callbacks=[early_stopper])
 
 
 all=np.append(np.append(train,val,axis=0),test,axis=0)

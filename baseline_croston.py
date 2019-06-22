@@ -5,7 +5,7 @@ import itertools
 from sklearn.metrics import mean_absolute_error
 from baseline_naive import naive_forecast
 
-fname = 'synthetic_data_month.pkl'
+fname = 'synthetic_data_1.pkl'
 with open(fname, 'rb') as f:
 	train, val, test = pickle.load(f)
 
@@ -23,6 +23,12 @@ def crostons(train, alpha):
 
 	for idx,elem in enumerate(train[1:], start=1):
 		# If we have a demand occurence, update a and p
+		try:
+			forecast = a/p
+		except:
+			forecast = 0
+		forecasts.append(forecast)
+
 		if elem != 0:
 			a = alpha*elem + (1-alpha)*a
 			p = alpha*q + (1-alpha)*p
@@ -31,11 +37,6 @@ def crostons(train, alpha):
 		# but need to keep track of q
 		if elem==0:
 			q += 1
-		try:
-			forecast = a/p
-		except:
-			forecast = 0
-		forecasts.append(forecast)
 
 	return forecasts
 
@@ -66,6 +67,23 @@ def tsb(train, alpha, beta):
 	return forecasts
 
 
+def optimize_model(model, *ranges):
+	best_mae = 1000
+	for params in itertools.product(ranges):
+		print(params)
+		forecasts = model(train, *params)
+		forecast_val = np.ones(len(val))*forecasts[-1]
+		forecast_train = np.ones(len(train_temp))*forecasts[-1]
+
+		mae_train = mean_absolute_error(forecasts, train_temp)
+		mae_val = mean_absolute_error(forecast_val, val)
+
+		if mae_val < best_mae:
+			best_mae = mae_val
+			best_params = params
+
+	return best_params
+
 train_temp = np.delete(train, 0)
 train_temp = train_temp.tolist()
 
@@ -82,9 +100,6 @@ for alpha in np.linspace(0.01, 0.99, 30):
 	if mae_val < best_mae:
 		best_mae = mae_val
 		best_alpha = alpha
-
-	# print('Alpha = {} train MAE: {} val MAE: {}'.format(alpha, mae_train, mae_val))
-	# print('-'*30)
 
 
 

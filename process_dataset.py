@@ -68,12 +68,16 @@ print(df.head(10))
 # Cut to first 1000 elems only
 # df = df.head(1000)
 plt.plot(df['item_cnt_day'])
+plt.grid()
+plt.title("Sales of various editions of Pink Floyd's Dark Side of the Moon")
+plt.xlabel('Date')
+plt.ylabel('# sold')
 plt.show()
 # Convert to np array
 df = df.values
 # Split to train val test
 train, val, test = np.split(df, [int(0.8*len(df)), int(0.9*len(df))], axis=0)
 
-
+print(df.shape)
 with open('split_data.pkl', 'wb') as f:
 	pickle.dump((train,val,test), f)
