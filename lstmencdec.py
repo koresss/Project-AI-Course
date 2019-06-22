@@ -1,15 +1,14 @@
 import numpy as np
-import keras
-import baseline_naive
-import tensorflow as tf
 import os
-
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+import keras
 from keras import backend as K
 from sklearn.metrics import mean_absolute_error
+import baseline_naive
 from tensorflow import set_random_seed
+import tensorflow as tf
 from random import seed
-from keras.callbacks import EarlyStopping, LearningRateScheduler, ReduceLROnPlateau, ModelCheckpoint
-
+import os
 os.environ['PYTHONHASHSEED']=str(1)
 seed(1)
 set_random_seed(2)
@@ -21,9 +20,9 @@ K.set_session(sess)
 
 layers = [10, 10] # Number of hidden neuros in each layer of the encoder and decoder
 
-learning_rate = 0.002
+learning_rate = 0.01
 decay = 0 # Learning rate decay
-optimiser = keras.optimizers.Adam(lr=learning_rate, decay=decay, amsgrad=True) # Other possible optimiser "sgd" (Stochastic Gradient Descent)
+optimiser = keras.optimizers.Adam(lr=learning_rate, decay=decay) # Other possible optimiser "sgd" (Stochastic Gradient Descent)
 
 num_input_features = 3 # The dimensionality of the input at each time step. In this case a 1D signal.
 num_output_features = 1 # The dimensionality of the output at each time step. In this case a 1D signal.
@@ -32,9 +31,9 @@ num_output_features = 1 # The dimensionality of the output at each time step. In
 
 loss = "mse" # Other loss functions are possible, see Keras documentation.
 # Regularisation isn't really needed for this application
-lambda_regulariser = 0.000001 # Will not be used if regulariser is None
-#regulariser = keras.regularizers.l2(lambda_regulariser) # Possible regulariser: keras.regularizers.l2(lambda_regulariser)
-regulariser=None
+lambda_regulariser = 0.00001 # Will not be used if regulariser is None
+regulariser = keras.regularizers.l2(lambda_regulariser) # Possible regulariser: keras.regularizers.l2(lambda_regulariser)
+#regulariser=None
 encoder_inputs = keras.layers.Input(shape=(None, num_input_features))
 
 # Create a list of RNN Cells, these are then concatenated into a single layer
@@ -44,7 +43,9 @@ for hidden_neurons in layers:
   encoder_cells.append(keras.layers.LSTMCell(hidden_neurons,
                                               kernel_regularizer=regulariser,
                                               recurrent_regularizer=regulariser,
-                                              bias_regularizer=regulariser))
+                                              bias_regularizer=regulariser,
+											  #dropout=0.3,
+											  recurrent_dropout=0.3))
 
 encoder = keras.layers.RNN(encoder_cells, return_state=True)
 
@@ -63,7 +64,9 @@ for hidden_neurons in layers:
   decoder_cells.append(keras.layers.LSTMCell(hidden_neurons,
                                               kernel_regularizer=regulariser,
                                               recurrent_regularizer=regulariser,
-                                              bias_regularizer=regulariser))
+                                              bias_regularizer=regulariser,
+											  #dropout=0.3,
+											  recurrent_dropout=0.3))
 
 decoder = keras.layers.RNN(decoder_cells, return_sequences=True, return_state=True)
 
@@ -135,8 +138,8 @@ def gen(data,batch_size, steps_per_epoch,
 
 in_seq_len=30
 targ_seq_len=1
-epochs = 10
-steps=100
+epochs = 100
+steps=10
 train_data_generator = gen(data=train,batch_size=32,
                                    steps_per_epoch=steps,
                                    input_sequence_length=in_seq_len,
@@ -145,18 +148,9 @@ val_data_generator = gen(data=val,batch_size=10,
                                    steps_per_epoch=steps,
                                    input_sequence_length=in_seq_len,
                                    target_sequence_length=targ_seq_len)
-
-
-lr_reducer = ReduceLROnPlateau(monitor='val_loss', factor=0.3, patience=2, cooldown=0)
-early_stopper = EarlyStopping(monitor='val_loss', patience=10)
-checkpoint = ModelCheckpoint('best_lstm.h5', monitor='val_loss', verbose=1, save_best_only=True, period=1)
-lr_scheduler = LearningRateScheduler(lambda x: 1. / (1. + x))
-model.fit_generator(train_data_generator,
-					steps_per_epoch=steps,
-					epochs=epochs,
-					validation_data=val_data_generator,
-					validation_steps=3,
-					callbacks=[early_stopper])
+from keras.callbacks import EarlyStopping
+early_stopper=EarlyStopping(monitor='val_loss',patience=1000,restore_best_weights=True)
+model.fit_generator(train_data_generator, steps_per_epoch=steps, epochs=epochs,validation_data=val_data_generator,validation_steps=3,callbacks=[early_stopper])
 
 
 all=np.append(np.append(train,val,axis=0),test,axis=0)
@@ -189,7 +183,7 @@ print(mae/maenaive)
 #plot train+val
 tr=(train[:,0]*stds[0])+means[0]
 all=np.append(np.append(tr,val_orig[:,0]),test_orig[:,0])
-plt.plot(all,'g',label='truth')
+plt.plot(all[30:],'g',label='truth')
 plt.plot(train_preds,'r',label='pred')
 plt.legend()
 plt.show()
