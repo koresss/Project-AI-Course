@@ -18,7 +18,7 @@ np.random.seed(42)
 sess=tf.Session(graph=tf.get_default_graph())
 K.set_session(sess)
 
-layers = [10, 10] # Number of hidden neuros in each layer of the encoder and decoder
+layers = [10,10] # Number of hidden neuros in each layer of the encoder and decoder
 
 learning_rate = 0.01
 decay = 0 # Learning rate decay
@@ -95,7 +95,7 @@ import pickle as pkl
 import numpy as np
 import random
 import matplotlib.pyplot as plt
-file='synthetic_data_1.pkl'
+file='split_data.pkl'
 train,val,test=pkl.load(open(file,'rb'))
 train=train.squeeze()[:,0:3]#add col 1 and 2
 #print(train)
@@ -135,6 +135,7 @@ def gen(data,batch_size, steps_per_epoch,
 			# The output of the generator must be ([encoder_input, decoder_input], [decoder_output])
 			decoder_input = np.zeros((decoder_output.shape[0], decoder_output.shape[1], 1))
 			yield ([encoder_input.squeeze(), decoder_input], decoder_output)
+			#yield ([encoder_input, decoder_input], decoder_output)
 
 in_seq_len=30
 targ_seq_len=1
@@ -193,4 +194,6 @@ for i in range(3):
 	train[:,i]=(train[:,i]*stds[i])+means[i]
 plt.plot(np.append(np.append(train[:,0],val_orig[:,0]),preds),'r',label='pred')
 plt.legend()
+plt.xlabel('day')
+plt.ylabel('sales')
 plt.show()

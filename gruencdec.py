@@ -95,7 +95,7 @@ import pickle as pkl
 import numpy as np
 import random
 import matplotlib.pyplot as plt
-file='synthetic_data_month.pkl'
+file='split_data.pkl'
 train,val,test=pkl.load(open(file,'rb'))
 train=train.squeeze()[:,0:3]#add col 1 and 2
 #print(train)
@@ -134,9 +134,10 @@ def gen(data,batch_size, steps_per_epoch,
 			decoder_output=np.expand_dims(decoder_output,axis=2)
 			# The output of the generator must be ([encoder_input, decoder_input], [decoder_output])
 			decoder_input = np.zeros((decoder_output.shape[0], decoder_output.shape[1], 1))
-			yield ([encoder_input.squeeze(), decoder_input], decoder_output)
+			#yield ([encoder_input.squeeze(), decoder_input], decoder_output)
+			yield ([encoder_input, decoder_input], decoder_output)
 
-in_seq_len=30
+in_seq_len=1
 targ_seq_len=1
 epochs = 150
 steps=10
@@ -186,11 +187,11 @@ all=np.append(np.append(tr,val_orig[:,0]),test_orig[:,0])
 plt.plot(all[30:],'g',label='truth')
 plt.plot(train_preds,'r',label='pred')
 plt.legend()
-plt.show()
+#plt.show()
 #plot test
 plt.plot(all,'g',label='truth')
 for i in range(3):
 	train[:,i]=(train[:,i]*stds[i])+means[i]
 plt.plot(np.append(np.append(train[:,0],val_orig[:,0]),preds),'r',label='pred')
 plt.legend()
-plt.show()
+#plt.show()
